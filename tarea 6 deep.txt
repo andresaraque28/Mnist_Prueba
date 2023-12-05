@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import keras
+from keras import layers
+
+
+# se definen las dimensiones con un reshape
+x_train = np.reshape(x_train, (x_train.shape[0],x_train.shape[1]*x_train.shape[2]))
+x_test = np.reshape(x_test, (x_test.shape[0],x_test.shape[1]* x_test.shape[2]))
+
+# se normalizan los valores de x_train y x_test
+# se halla media y desviacion
+med= x_train.mean(axis=0)
+desv= x_train.std(axis=0)
+
+x_train= (x_train - med)/desv
+x_test= (x_test - med)/desv
+
+y_train_hot = tf.keras.utils.to_categorical(y_train, 10)
+y_test_hot = tf.keras.utils.to_categorical(y_test, 10)
+
+inputs = keras.Input(shape=(784,))
+#capas internas
+x =layers.Dense(128, activation="relu")(inputs)
+x = layers.Dense(64, activation="relu") (x)
+x = layers.Dense(32, activation="relu") (x)
+
+#capa salida
+outputs = layers.Dense(10, activation="relu") (x)
+
+#modelo
+model = keras.Model(inputs=inputs, outputs=outputs, name="fashion_mnist_model")
+
+
+model.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=keras.optimizers.RMSprop(),
+    metrics=[keras.metrics.SparseCategoricalAccuracy()],
+)
+history = model.fit(x_train, y_train, batch_size=64, epochs=20, validation_split=0.2)
+
+
+test_scores = model.evaluate(x_test, y_test, verbose=2)
+print("Test loss:", test_scores[0])
+print("Test accuracy:", test_scores[1])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
